@@ -1,18 +1,19 @@
-// Configurazione delle registrazioni reali (Playwright, viewport 390x844 @2x).
-// src: file in public/clips/ (generato da scripts/record.mjs). Finché manca, la scena mostra un segnaposto.
-// zoom: keyframe {f: frame relativo alla scena, s: scala, x/y: punto focale in coordinate 390x844}
-// taps: tocchi evidenziati {f, x, y} in coordinate 390x844
+// Registrazioni reali dell'app (scripts/record.mjs → public/clips/*.mp4, 780x1688 = 390x844 @2x).
+// startSec: secondo di partenza nel file (vedi public/clips/markers.json); rate: velocità di riproduzione.
+// zoom: keyframe {f: frame relativo alla scena, s: scala, x/y: punto focale in coordinate 390x844, ty: spostamento verticale in px video}
+// taps: tocchi sintetici {f, x, y} — vuoti: i tocchi veri sono già impressi nella registrazione.
 
-export type Zoom = {f: number; s: number; x: number; y: number};
+export type Zoom = {f: number; s: number; x: number; y: number; ty?: number};
 export type Tap = {f: number; x: number; y: number};
-export type Clip = {src?: string; startSec?: number; title: string; sub?: string; zoom: Zoom[]; taps: Tap[]};
+export type Clip = {src?: string; startSec?: number; rate?: number; title: string; sub?: string; zoom: Zoom[]; taps: Tap[]};
 
 export const CLIPS: Record<string, Clip> = {
-  'app-eval-a': {title: 'Valutazione rapida', zoom: [{f: 0, s: 1, x: 195, y: 422}, {f: 90, s: 1.25, x: 195, y: 300}], taps: [{f: 30, x: 195, y: 380}]},
-  'app-eval-b': {title: 'In pochi minuti', zoom: [{f: 0, s: 1.3, x: 195, y: 350}, {f: 90, s: 1.05, x: 195, y: 500}], taps: [{f: 25, x: 120, y: 420}, {f: 55, x: 270, y: 520}]},
-  'app-generate': {title: 'Si crea da sola', zoom: [{f: 0, s: 1, x: 195, y: 422}, {f: 75, s: 1.35, x: 195, y: 600}], taps: [{f: 18, x: 195, y: 700}]},
-  'app-scheda': {title: 'Obiettivo · Livello · Limitazioni', sub: 'Linee guida NSCA · ACSM', zoom: [{f: 0, s: 1.2, x: 195, y: 250}, {f: 90, s: 1.2, x: 195, y: 650}], taps: []},
-  'app-pdf': {title: 'Pronta in PDF', zoom: [{f: 0, s: 1, x: 195, y: 422}, {f: 75, s: 1.3, x: 195, y: 400}], taps: [{f: 15, x: 300, y: 160}]},
-  'client-timer': {title: 'Timer di recupero', zoom: [{f: 0, s: 1, x: 195, y: 500}, {f: 75, s: 1.4, x: 195, y: 790}], taps: [{f: 12, x: 300, y: 420}]},
-  'client-log': {title: 'Storico allenamenti', zoom: [{f: 0, s: 1.25, x: 195, y: 600}, {f: 75, s: 1.05, x: 195, y: 422}], taps: [{f: 20, x: 195, y: 780}]},
+  'app-eval-a': {src: 'clips/pt.mp4', startSec: 18.6, rate: 1.6, title: 'Valutazione rapida', zoom: [{f: 0, s: 1, x: 195, y: 422}, {f: 52, s: 1.3, x: 195, y: 260}], taps: []},
+  'app-eval-b': {src: 'clips/pt.mp4', startSec: 24.4, rate: 2, title: 'In pochi minuti', zoom: [{f: 0, s: 1.15, x: 195, y: 360}, {f: 52, s: 1.25, x: 195, y: 460}], taps: []},
+  'app-generate': {src: 'clips/pt.mp4', startSec: 28.4, rate: 1.2, title: 'Si crea da sola', zoom: [{f: 0, s: 1.2, x: 195, y: 700}, {f: 58, s: 1.05, x: 195, y: 520}], taps: []},
+  'app-scheda': {src: 'clips/pt.mp4', startSec: 33.9, rate: 0.8, title: 'Obiettivo · Livello · Limitazioni', zoom: [{f: 0, s: 1.15, x: 195, y: 420}, {f: 107, s: 1.25, x: 195, y: 450}], taps: []},
+  'app-linee': {src: 'clips/pt.mp4', startSec: 36.75, rate: 0.75, title: 'Linee guida NSCA · ACSM', zoom: [{f: 0, s: 1.25, x: 195, y: 450}, {f: 99, s: 1.15, x: 195, y: 600}], taps: []},
+  'app-pdf': {src: 'clips/pdf.mp4', startSec: 0, rate: 1, title: 'Pronta in PDF', zoom: [{f: 0, s: 1.15, x: 195, y: 330}, {f: 49, s: 1.4, x: 195, y: 380}], taps: []},
+  'client-timer': {src: 'clips/client.mp4', startSec: 3.4, rate: 1.2, title: 'Timer di recupero', zoom: [{f: 0, s: 1.3, x: 195, y: 420}, {f: 26, s: 1.3, x: 195, y: 420}, {f: 45, s: 1.1, x: 195, y: 810, ty: -846}, {f: 105, s: 1.1, x: 195, y: 810, ty: -846}], taps: []},
+  'client-log': {src: 'clips/client.mp4', startSec: 9, rate: 1.4, title: 'Storico allenamenti', zoom: [{f: 0, s: 1.1, x: 195, y: 500}, {f: 18, s: 1.15, x: 195, y: 740, ty: -692}, {f: 63, s: 1.15, x: 195, y: 740, ty: -692}], taps: []},
 };

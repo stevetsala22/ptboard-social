@@ -1,5 +1,5 @@
 import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig, staticFile, delayRender, continueRender} from 'remotion';
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {LINES} from './timeline';
 import {C, FONT, H, SAFE_BOTTOM} from './theme';
 
@@ -94,9 +94,9 @@ export const Captions: React.FC = () => {
               key={i}
               style={{
                 display: 'inline-block',
-                margin: '0 10px',
+                margin: '0 14px',
                 opacity: active ? 1 : 0.35,
-                transform: `scale(${active ? interpolate(pop, [0, 1], [1.25, 1]) : 1})`,
+                transform: `scale(${active ? interpolate(pop, [0, 1], [1.15, 1]) : 1})`,
                 ...(key && active
                   ? {background: 'linear-gradient(135deg,#60a5fa,#22d3ee,#a78bfa)', WebkitBackgroundClip: 'text', color: 'transparent'}
                   : {}),

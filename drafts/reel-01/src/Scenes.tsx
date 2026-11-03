@@ -287,6 +287,7 @@ export const AppClip: React.FC<{id: string; bg?: string}> = ({id, bg}) => {
   const s = interpolate(frame, kf, z.map((k) => k.s), {...clamp, easing: Easing.inOut(Easing.cubic)});
   const fx = interpolate(frame, kf, z.map((k) => k.x), {...clamp, easing: Easing.inOut(Easing.cubic)});
   const fy = interpolate(frame, kf, z.map((k) => k.y), {...clamp, easing: Easing.inOut(Easing.cubic)});
+  const ty = interpolate(frame, kf, z.map((k) => k.ty || 0), {...clamp, easing: Easing.inOut(Easing.cubic)});
   const PW = 860; // larghezza schermo telefono in px video
   const k = PW / 390;
   const PH = 844 * k;
@@ -305,16 +306,16 @@ export const AppClip: React.FC<{id: string; bg?: string}> = ({id, bg}) => {
           background: '#fff',
           boxShadow: '0 0 0 18px #0f172a, 0 40px 120px rgba(15,23,42,0.35)',
           transformOrigin: `${fx * k}px ${fy * k}px`,
-          transform: `scale(${s * interpolate(enter, [0, 1], [0.92, 1])})`,
+          transform: `translateY(${ty}px) scale(${s * interpolate(enter, [0, 1], [0.92, 1])})`,
         }}
       >
         {clip.src ? (
-          <OffthreadVideo src={staticFile(clip.src)} startFrom={Math.round((clip.startSec || 0) * fps)} muted style={{width: PW, height: PH, objectFit: 'cover'}} />
+          <OffthreadVideo src={staticFile(clip.src)} startFrom={Math.round((clip.startSec || 0) * fps)} playbackRate={clip.rate || 1} muted style={{width: PW, height: PH, objectFit: 'cover'}} />
         ) : (
           <div style={{width: PW, height: PH, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', background: 'repeating-linear-gradient(45deg,#f1f5f9 0 30px,#e2e8f0 30px 60px)', color: C.muted, fontSize: 44, fontWeight: 800, textAlign: 'center', padding: 60}}>
             REGISTRAZIONE APP
             <div style={{fontSize: 60, color: C.strong, marginTop: 20}}>{clip.title}</div>
-            <div style={{fontSize: 32, marginTop: 20}}>(segnaposto: manca accesso a personaltrainerboard.com)</div>
+            <div style={{fontSize: 32, marginTop: 20}}>(segnaposto: lancia scripts/record.mjs)</div>
           </div>
         )}
         {clip.taps.map((t, i) => {

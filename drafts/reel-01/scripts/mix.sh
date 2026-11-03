@@ -9,6 +9,9 @@ VIDEO=out/video-raw.mp4
 VOICE=public/audio/voice.wav
 MUSIC=${1:-public/audio/music.mp3}
 MUSIC_OFFSET=${MUSIC_OFFSET:-0}   # secondi da saltare nel brano per far cadere il drop sul taglio 0
+# durata del reel in secondi, da src/timeline.ts (DURATION in frame a 30fps)
+DUR=$(node -e 'const s=require("fs").readFileSync("src/timeline.ts","utf8");process.stdout.write(String(+s.match(/DURATION = (\d+)/)[1]/30))')
+FADE_ST=$(node -e "process.stdout.write(String($DUR-1.4))")
 
 # Pulizia voce (serve soprattutto per l'opzione "voce registrata al telefono")
 VCLEAN="highpass=f=80,afftdn=nf=-25,acompressor=threshold=-20dB:ratio=3:attack=5:release=80,equalizer=f=3500:t=q:w=1:g=2"
@@ -34,7 +37,7 @@ loudnorm2() { # $1 = filtergraph input label chain file, two-pass loudnorm su fi
 }
 
 mkdir -p out
-ffmpeg -y -loglevel error -i "$VOICE" -af "$VCLEAN,apad,atrim=0:30" -ar 48000 out/voice-clean.wav
+ffmpeg -y -loglevel error -i "$VOICE" -af "$VCLEAN,apad,atrim=0:$DUR" -ar 48000 out/voice-clean.wav
 
 # Solo voce
 loudnorm2 out/voice-clean.wav out/mix-voce.wav
@@ -42,7 +45,7 @@ loudnorm2 out/voice-clean.wav out/mix-voce.wav
 # Voce + musica
 if [ -f "$MUSIC" ]; then
   ffmpeg -y -loglevel error -i out/voice-clean.wav -ss "$MUSIC_OFFSET" -i "$MUSIC" -filter_complex \
-    "[1:a]aresample=48000,atrim=0:30,asetpts=N/SR/TB,volume=-8dB,$MDUCK,afade=t=out:st=28.6:d=1.4[m];[0:a][m]amix=inputs=2:normalize=0[o]" \
+    "[1:a]aresample=48000,atrim=0:$DUR,asetpts=N/SR/TB,volume=-8dB,$MDUCK,afade=t=out:st=$FADE_ST:d=1.4[m];[0:a][m]amix=inputs=2:normalize=0[o]" \
     -map "[o]" out/mix-pre.wav
   loudnorm2 out/mix-pre.wav out/mix-full.wav
 else
