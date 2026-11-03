@@ -5,3 +5,4 @@ out/
 public/clips/*.webm
 public/clips/*.mp4
 public/audio/*.wav
+.cdn/

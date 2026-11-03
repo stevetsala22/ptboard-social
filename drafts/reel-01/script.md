@@ -5,6 +5,18 @@ Sorgente dei tempi: `src/timeline.ts` (scene + frasi). Tempi parola definitivi: 
 
 > Stato: **bozza** — tempi voce stimati, verranno riallineati dopo la generazione della voce (ElevenLabs) e al BPM del brano.
 
+## Produzione — come si chiude
+1. `cp .env.example .env` e compila (account di TEST + ElevenLabs).
+2. Registrazioni app: `node --env-file=.env scripts/record.mjs` → `public/clips/pt.webm`, `client.webm`, `markers.json`.
+   Se la rete blocca i CDN: `scripts/cdn-setup.sh` e poi `CDN_MIRROR=.cdn node --env-file=.env scripts/record.mjs`.
+3. Voce: `node --env-file=.env scripts/voice.mjs` → `public/audio/voice.wav` + `alignment.json`.
+4. Collega le clip in `src/clips.ts` (`src` + `startSec` dai `markers.json`), poi `npm run render`.
+5. Musica in `public/audio/music.mp3` e `scripts/mix.sh` → `reel.mp4` + `reel-voce.mp4`.
+
+### Blocchi aperti (3 nov)
+- **Account di test**: le credenziali `PTB_TEST_EMAIL`/`PTB_TEST_PASSWORD` dell'ambiente (dominio `esempio.it`) vengono rifiutate dal login ("Email o password errati"): l'account probabilmente non esiste. Il resto di `record.mjs` è verificato fino al login sul sito live.
+- **ElevenLabs**: la chiave dell'ambiente risponde `invalid_api_key`; manca anche `ELEVENLABS_VOICE_ID`.
+
 ## Voce (frase per frase)
 
 | # | Inizio | Fine | Testo |

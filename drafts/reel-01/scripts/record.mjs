@@ -3,10 +3,19 @@
 // Uso: node --env-file=.env scripts/record.mjs
 // Output: public/clips/pt.webm, public/clips/client.webm, public/clips/markers.json (secondi dei passaggi chiave)
 //
-// NB: i selettori usano le etichette italiane dell'app (LANGS.it). Al primo giro sul sito live
-// vanno verificati: con HEADED=1 si vede il browser, con PWDEBUG=1 si va passo passo.
-import {chromium} from 'playwright';
+// Selettori verificati sul codice di index.html / share.html (LANGS.it, campi ff-<name>).
+// Con HEADED=1 si vede il browser, con PWDEBUG=1 si va passo passo.
+// Se la rete blocca i CDN (unpkg/jsdelivr/gstatic): CDN_MIRROR=<cartella con node_modules> → vedi scripts/cdn-mirror.mjs
+import {createRequire} from 'node:module';
+import {execSync} from 'node:child_process';
 import fs from 'node:fs';
+import {mirrorCdn} from './cdn-mirror.mjs';
+
+// playwright: locale se installato, altrimenti quello globale
+const req = createRequire(import.meta.url);
+let pw;
+try { pw = req('playwright'); } catch { pw = req(execSync('npm root -g').toString().trim() + '/playwright'); }
+const {chromium} = pw;
 
 const BASE = process.env.PTB_BASE_URL || 'https://personaltrainerboard.com';
 const EMAIL = process.env.PTB_TEST_EMAIL;
@@ -31,7 +40,7 @@ const DEMO_PATIENTS = [
   demo('DEMO-101', 'Giulia', 'Ferri', 'F', 1992, 166, 61, 'Tonificazione', 'Leggera'),
   demo('DEMO-102', 'Marco', 'Bellini', 'M', 1985, 178, 84, 'Perdere peso', 'Sedentaria'),
   demo('DEMO-103', 'Elena', 'Ricci', 'F', 1978, 162, 58, 'Salute generale', 'Attiva'),
-  demo('DEMO-104', 'Luca', 'Moretti', 'M', 1996, 182, 77, 'Massa muscolare', 'Attiva'),
+  demo('DEMO-104', 'Luca', 'Moretti', 'M', 1996, 182, 77, 'Aumentare massa', 'Attiva'),
   demo('DEMO-105', 'Chiara', 'Galli', 'F', 1988, 170, 66, 'Resistenza', 'Leggera'),
 ];
 
@@ -59,7 +68,19 @@ const injectTaps = (page) =>
     }, true);
   }, TAP_CSS);
 
-const browser = await chromium.launch({headless: !process.env.HEADED});
+const proxy = process.env.HTTPS_PROXY ? {server: process.env.HTTPS_PROXY} : undefined;
+const browser = await chromium.launch({headless: !process.env.HEADED, proxy});
+
+// Contesto comune: mobile, niente redirect alla landing, banner cookie già chiuso, CDN mirror se serve
+const newCtx = async (extra = {}) => {
+  const ctx = await browser.newContext({viewport: VIEW, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'it-IT', ignoreHTTPSErrors: !!proxy, ...extra});
+  await mirrorCdn(ctx);
+  await ctx.addInitScript(() => {
+    try { localStorage.setItem('ptb_entered', '1'); } catch (e) {}
+  });
+  return ctx;
+};
+const closeCookies = (page) => page.getByText('Solo necessari').click({timeout: 4000}).catch(() => {});
 const t0 = {pt: 0, client: 0};
 const mark = (track, name) => (markers[`${track}:${name}`] = +((Date.now() - t0[track]) / 1000).toFixed(2));
 
@@ -77,13 +98,17 @@ const typeSlow = async (loc, text) => {
 
 // ── 1) Login + seed (NON registrato) ──
 {
-  const ctx = await browser.newContext({viewport: VIEW, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'it-IT'});
+  const ctx = await newCtx();
   const page = await ctx.newPage();
-  await page.goto(BASE + '/index.html', {waitUntil: 'networkidle'});
-  await page.getByPlaceholder(/email/i).first().fill(EMAIL);
+  await page.goto(BASE + '/index.html', {waitUntil: 'load'});
+  await closeCookies(page);
+  await page.getByText('Accedi', {exact: true}).first().click(); // la schermata parte su "Crea account"
+  await page.locator('input[type=email]').first().fill(EMAIL);
   await page.locator('input[type=password]').first().fill(PASS);
-  await page.getByRole('button', {name: /^Accedi$/}).click();
-  await page.waitForFunction(() => window.fbAuth && fbAuth.currentUser, null, {timeout: 30000});
+  await page.getByRole('button', {name: /^Accedi$/}).last().click();
+  await page.waitForFunction(() => window.fbAuth && fbAuth.currentUser, null, {timeout: 30000}).catch(async () => {
+    throw new Error('Login fallito: ' + ((await page.innerText('body')).match(/Email o password errati|[^\n]*errat[^\n]*/)?.[0] || 'timeout'));
+  });
   // Seed solo se l'account di test è vuoto: mai sovrascrivere dati esistenti
   const res = await page.evaluate(async (patients) => {
     const uid = fbAuth.currentUser.uid;
@@ -100,31 +125,29 @@ const typeSlow = async (loc, text) => {
 // ── 2) Registrazione PT: valutazione rapida → scheda auto → PDF → link cliente ──
 let shareUrl = null;
 {
-  const ctx = await browser.newContext({
-    viewport: VIEW, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'it-IT',
-    storageState: '.auth/state.json', recordVideo: {dir: OUT + '/tmp-pt', size: {width: 780, height: 1688}},
-  });
+  const ctx = await newCtx({storageState: '.auth/state.json', recordVideo: {dir: OUT + '/tmp-pt', size: {width: 780, height: 1688}}});
   const page = await ctx.newPage();
   await injectTaps(page);
   t0.pt = Date.now();
-  await page.goto(BASE + '/index.html', {waitUntil: 'networkidle'});
+  await page.goto(BASE + '/index.html', {waitUntil: 'load'});
+  await closeCookies(page);
+  await page.getByText('⚡ Valutazione rapida').first().waitFor({timeout: 30000});
   await sleep(1500);
   mark('pt', 'home');
 
   await tap(page, page.getByText('⚡ Valutazione rapida').first());
   mark('pt', 'eval-open');
-  const field = (label) => page.locator(`label:has-text("${label}")`).locator('xpath=following::input[1]').first();
-  await typeSlow(field('Nome'), 'Davide');
-  await typeSlow(field('Cognome'), 'Conti');
-  await tap(page, page.getByRole('button', {name: /^M$/}).first());
-  await typeSlow(field('Anno di nascita'), '1990');
-  await typeSlow(field('Altezza'), '180');
-  await typeSlow(field('Peso'), '82');
+  await typeSlow(page.locator('#ff-nome'), 'Davide');
+  await typeSlow(page.locator('#ff-cognome'), 'Conti');
+  await tap(page, page.locator('#qa-sec-sex').getByRole('button', {name: 'M', exact: true}));
+  await typeSlow(page.locator('#qa-sec-year input'), '1990');
+  await typeSlow(page.locator('#ff-altezza'), '180');
+  await typeSlow(page.locator('#ff-peso'), '82');
   mark('pt', 'eval-anagrafica');
-  await tap(page, page.getByText('Intermedio', {exact: true}).first());
-  await tap(page, page.getByText('Massa muscolare').first());
+  await tap(page, page.getByRole('button', {name: 'Intermedio', exact: true}).first());
+  await tap(page, page.locator('#qa-sec-goal').getByRole('button', {name: /Aumentare massa/}));
   // PAR-Q+: 7 risposte NO
-  const no = page.getByRole('button', {name: /^NO$/});
+  const no = page.getByRole('button', {name: 'NO', exact: true});
   for (let i = 0; i < 7; i++) await tap(page, no.nth(i));
   mark('pt', 'eval-parq');
 
@@ -158,23 +181,23 @@ let shareUrl = null;
 
 // ── 3) Registrazione cliente: link condiviso, timer di recupero, salva seduta ──
 if (shareUrl) {
-  const ctx = await browser.newContext({
-    viewport: VIEW, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'it-IT',
-    recordVideo: {dir: OUT + '/tmp-client', size: {width: 780, height: 1688}},
-  });
+  const ctx = await newCtx({recordVideo: {dir: OUT + '/tmp-client', size: {width: 780, height: 1688}}});
   const page = await ctx.newPage();
   await injectTaps(page);
   t0.client = Date.now();
-  await page.goto(shareUrl, {waitUntil: 'networkidle'});
+  await page.goto(shareUrl, {waitUntil: 'load'});
+  await page.locator('.set-check').first().waitFor({timeout: 30000});
   await sleep(1500);
   mark('client', 'open');
-  // spunta la prima serie → parte il timer di recupero
-  const set = page.locator('input[type=checkbox], .set-check, [data-set]').first();
-  await tap(page, set);
+  // prima serie: peso + reps (il ✓ li richiede), poi ✓ → parte il timer di recupero
+  const row = page.locator('.set-check').first().locator('xpath=..');
+  await typeSlow(row.locator('input.set-input').nth(0), '40');
+  await typeSlow(row.locator('input.set-input').nth(1), '10');
+  await tap(page, page.locator('.set-check').first());
   mark('client', 'timer');
   await sleep(4000);
   for (let i = 0; i < 3; i++) await page.mouse.wheel(0, 300), await sleep(400);
-  await tap(page, page.getByText('Salva seduta').first());
+  await tap(page, page.locator('#btnSave'));
   mark('client', 'saved');
   await sleep(2500);
   await ctx.close();
