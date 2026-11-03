@@ -1,0 +1,285 @@
+{
+ "voice": "kokoro:im_nicola",
+ "words": [
+  {
+   "w": "Quanto",
+   "from": 4,
+   "to": 15
+  },
+  {
+   "w": "ci",
+   "from": 15,
+   "to": 21
+  },
+  {
+   "w": "metti",
+   "from": 21,
+   "to": 31
+  },
+  {
+   "w": "a",
+   "from": 31,
+   "to": 36
+  },
+  {
+   "w": "fare",
+   "from": 36,
+   "to": 43
+  },
+  {
+   "w": "una",
+   "from": 43,
+   "to": 50
+  },
+  {
+   "w": "scheda",
+   "from": 50,
+   "to": 59
+  },
+  {
+   "w": "su",
+   "from": 59,
+   "to": 64
+  },
+  {
+   "w": "misura?",
+   "from": 64,
+   "to": 75
+  },
+  {
+   "w": "Cronometro",
+   "from": 81,
+   "to": 102
+  },
+  {
+   "w": "alla",
+   "from": 102,
+   "to": 111
+  },
+  {
+   "w": "mano.",
+   "from": 111,
+   "to": 121
+  },
+  {
+   "w": "Dati",
+   "from": 138,
+   "to": 149
+  },
+  {
+   "w": "del",
+   "from": 149,
+   "to": 157
+  },
+  {
+   "w": "cliente,",
+   "from": 157,
+   "to": 174
+  },
+  {
+   "w": "obiettivo,",
+   "from": 177,
+   "to": 201
+  },
+  {
+   "w": "screening",
+   "from": 204,
+   "to": 222
+  },
+  {
+   "w": "PAR-Q…",
+   "from": 222,
+   "to": 236
+  },
+  {
+   "w": "e",
+   "from": 300,
+   "to": 307
+  },
+  {
+   "w": "genera.",
+   "from": 307,
+   "to": 324
+  },
+  {
+   "w": "Diciassette",
+   "from": 336,
+   "to": 362
+  },
+  {
+   "w": "secondi.",
+   "from": 362,
+   "to": 379
+  },
+  {
+   "w": "Su",
+   "from": 393,
+   "to": 399
+  },
+  {
+   "w": "misura",
+   "from": 399,
+   "to": 412
+  },
+  {
+   "w": "per",
+   "from": 412,
+   "to": 419
+  },
+  {
+   "w": "obiettivo,",
+   "from": 419,
+   "to": 438
+  },
+  {
+   "w": "livello",
+   "from": 441,
+   "to": 456
+  },
+  {
+   "w": "e",
+   "from": 456,
+   "to": 461
+  },
+  {
+   "w": "limitazioni,",
+   "from": 461,
+   "to": 486
+  },
+  {
+   "w": "con",
+   "from": 489,
+   "to": 495
+  },
+  {
+   "w": "linee",
+   "from": 495,
+   "to": 504
+  },
+  {
+   "w": "guida",
+   "from": 504,
+   "to": 514
+  },
+  {
+   "w": "NSCA",
+   "from": 514,
+   "to": 539
+  },
+  {
+   "w": "e",
+   "from": 539,
+   "to": 544
+  },
+  {
+   "w": "ACSM.",
+   "from": 544,
+   "to": 566
+  },
+  {
+   "w": "PDF",
+   "from": 576,
+   "to": 592
+  },
+  {
+   "w": "in",
+   "from": 592,
+   "to": 599
+  },
+  {
+   "w": "un",
+   "from": 599,
+   "to": 603
+  },
+  {
+   "w": "tap.",
+   "from": 603,
+   "to": 610
+  },
+  {
+   "w": "E",
+   "from": 617,
+   "to": 622
+  },
+  {
+   "w": "il",
+   "from": 622,
+   "to": 629
+  },
+  {
+   "w": "cliente",
+   "from": 629,
+   "to": 642
+  },
+  {
+   "w": "la",
+   "from": 642,
+   "to": 647
+  },
+  {
+   "w": "apre",
+   "from": 647,
+   "to": 656
+  },
+  {
+   "w": "dal",
+   "from": 656,
+   "to": 662
+  },
+  {
+   "w": "telefono.",
+   "from": 662,
+   "to": 677
+  },
+  {
+   "w": "PT",
+   "from": 687,
+   "to": 701
+  },
+  {
+   "w": "Board.",
+   "from": 701,
+   "to": 712
+  },
+  {
+   "w": "Provalo",
+   "from": 719,
+   "to": 734
+  },
+  {
+   "w": "gratis",
+   "from": 734,
+   "to": 747
+  },
+  {
+   "w": "per",
+   "from": 747,
+   "to": 754
+  },
+  {
+   "w": "quindici",
+   "from": 754,
+   "to": 772
+  },
+  {
+   "w": "giorni:",
+   "from": 772,
+   "to": 785
+  },
+  {
+   "w": "link",
+   "from": 790,
+   "to": 800
+  },
+  {
+   "w": "in",
+   "from": 800,
+   "to": 809
+  },
+  {
+   "w": "bio.",
+   "from": 809,
+   "to": 819
+  }
+ ]
+}
